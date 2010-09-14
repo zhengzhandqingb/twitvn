@@ -7,7 +7,7 @@
   # If you are running python 2.5, also put the simplejson folder into the TwitVN folder (simplejson is included with python 2.6)
   # Add the following line to post-commit in the SVN hooks folder (trac is optional)
     {{{
-      python /path/to/svn/repo/hooks/TwitVN/twitvn.py -f "${REPOS}" -r "${REV}" -t "<url for trac>"
+      python /path/to/svn/repo/hooks/TwitVN/twitvn.py -f $REPOS -r $REV -t "<url for trac>"
     }}}
 
 = OAuth Setup =
