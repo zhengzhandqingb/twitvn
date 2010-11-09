@@ -1,10 +1,14 @@
 #summary TwitVN 2.0 documentation
 #labels OAuth,TwitVN
 
+= Pre-installation =
+You will need to install tweepy (and simpleJSON if you have python 2.5, it's included with 2.6)
+  # easy_install simplejson (python 2.5 only)
+  # easy_install tweepy
+
 = Installation =
   # Make a TwitVN folder in the SVN hooks folder
-  # Put twitvn.py, auth.py, and the tweepy folder into the TwitVN folder
-  # If you are running python 2.5, also put the simplejson folder into the TwitVN folder (simplejson is included with python 2.6)
+  # Put twitvn.py and auth.py into the TwitVN folder
   # Add the following line to post-commit in the SVN hooks folder (trac is optional)
     {{{
       python /path/to/svn/repo/hooks/TwitVN/twitvn.py -f "${REPOS}" -r "${REV}" -t "<url for trac>"
