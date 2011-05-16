@@ -1,6 +1,11 @@
 #summary TwitVN 2.0 documentation
 #labels OAuth,TwitVN
 
+= Twitter Setup =
+You need to set up your own Twitter app for this script to work.
+  # Go to this site: https://dev.twitter.com/apps/new
+  # Set up an app, and then enter the consumer secret/consumer key into twitvn.py and auth.py
+
 = Pre-installation =
 You will need to install tweepy (and simpleJSON if you have python 2.5, it's included with 2.6)
   # easy_install simplejson (python 2.5 only)
