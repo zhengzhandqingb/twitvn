@@ -10,6 +10,7 @@ You need to set up your own Twitter app for this script to work.
 You will need to install tweepy (and simpleJSON if you have python 2.5, it's included with 2.6)
   # easy_install simplejson (python 2.5 only)
   # easy_install tweepy
+  # For GIT: easy_install gitpython
 
 = Installation =
   # Make a TwitVN folder in the SVN hooks folder
