@@ -13,12 +13,25 @@ You will need to install tweepy (and simpleJSON if you have python 2.5, it's inc
   # For GIT: easy_install gitpython
 
 = Installation =
-  # Make a TwitVN folder in the SVN hooks folder
-  # Put twitvn.py and auth.py into the TwitVN folder
-  # Add the following line to post-commit in the SVN hooks folder (trac is optional)
-    {{{
-      python /path/to/svn/repo/hooks/TwitVN/twitvn.py -f "${REPOS}" -r "${REV}" -t "<url for trac>"
-    }}}
+  # Make a TwitVN folder in the SVN or GIT hooks folder
+  # Put twitvn.py (or twitvn-git.py) and auth.py into the TwitVN folder
+  # For SVN:
+    # Add the following line to post-commit in the SVN hooks folder (trac is optional)
+      {{{
+        python /path/to/svn/repo/hooks/TwitVN/twitvn.py -f "${REPOS}" -r "${REV}" -t "<url for trac>"
+      }}}
+  # For GIT:
+    # Add the following line to update in the GIT hooks folder
+      {{{
+        echo "-o ${2} -n ${3}" > twitvn.tmp
+      }}}
+    # Add the following line to post-update in the GIT hooks folder
+      {{{
+        DIR=$(cd `dirname $0` && pwd)
+        PARENT=`dirname $DIR`
+        python "${PARENT}"/hooks/twitvn-git.py -f "${PARENT}" `cat twitvn.tmp`
+        rm twitvn.tmp
+      }}}
 
 = OAuth Setup =
 In order for TwitVN to post to Twitter it must be authorized to your account.  To do this follow the instructions below.
