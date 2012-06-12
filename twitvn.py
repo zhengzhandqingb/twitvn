@@ -22,12 +22,14 @@ import svn.core
 import tweepy
 
 name = 'twitvn'
-version = '2.0'
+version = '2.1'
 
 CONSUMER_KEY = 'Enter consumer key here'
 CONSUMER_SECRET = 'Enter consumer secret here'
 ACCESS_KEY = 'Enter access key here'
 ACCESS_SECRET = 'Enter access secret here'
+BITLY_USERNAME = '' #Enter bitly username between the ''
+BITLY_KEY = '' #Enter bitly key between the ''
 
 class TwitOAuth:
 	"This class tweets via OAuth"
@@ -51,27 +53,55 @@ class SVNHelper:
 		self.author = svn.fs.revision_prop(fs_ptr, revision, svn.core.SVN_PROP_REVISION_AUTHOR, pool)
 
 
-def generateTwitter(author, revision, comment, domain=''):
+def generateTwitter(author, revision, comment, domain='', reponame=''):
 	tweet = ''
 	tracurl = ''
-	trimLength = 140 - (len(author)+1) - 5
+	comment = comment.rstrip(' ')
+	trimLength = 140 - (len(author)) - len(str(revision))
 
 	# if there's a trac domain, count that as well
 	if domain:
-		tracurl = '/'.join([domain,'changeset',str(revision)])
+		trimLength -= 13 #additional chars in the tweet
+		if reponame:
+			trimLength -= len(reponame)
+			tracurl = '/'.join([domain,'changeset',str(revision),reponame])
+		else:
+			tracurl = '/'.join([domain,'changeset',str(revision)])
+		#Get short url from bit.ly
+		if BITLY_USERNAME and BITLY_KEY:
+			#import bitly only if fields are not empty
+			import bitlyapi
+			try:
+				bitly = bitlyapi.BitLy(BITLY_USERNAME, BITLY_KEY)
+				resUrl = bitly.shorten(longUrl=tracurl)
+				shortUrl = resUrl['url']
+			except:
+				shortUrl = ''
+			if shortUrl:
+				tracurl = shortUrl
+
 		trimLength -= len(tracurl)
-		
+	else:
+		trimLength -= 8 #additional chars in the tweet
 	if len(comment) > trimLength:
-		comment = comment[0:trimLength].rstrip(' ') + '...'
-		
-	tweet = '%s: %s %s' % (author, comment, tracurl)
+		comment = comment[0:trimLength-3]	
+		comment = comment.rstrip(' ')
+		comment += '..' if comment.endswith('.') else '...'		
+	if domain:
+		if reponame:
+			tweet = '%s: rev %s on %s: %s %s' % (author, str(revision), reponame, comment, tracurl)
+		else:
+			tweet = '%s: rev %s: %s %s' % (author, str(revision), comment, tracurl)
+	else:
+		tweet = '%s: rev %s: %s' % (author, str(revision), comment)
+
 	return tweet
 
 def main(pool, options):
 	# Get SVN info
 	svnHelper = SVNHelper(options.PATH, options.REVISION, pool)
 	# Generate a tweet
-	twitter = generateTwitter(svnHelper.author, options.REVISION, svnHelper.message, options.DOMAIN)
+	twitter = generateTwitter(svnHelper.author, options.REVISION, svnHelper.message, options.DOMAIN, options.REPONAME)
 	# Send it to twitter
 	TwitOAuth(twitter).sendTwitter()
 
@@ -79,7 +109,7 @@ if __name__ == '__main__':
 	# get arguments from the command line
 	# important arguments are username, password, comment
 
-	usage = 'usage: %prog -f<svn_path> -r<svn_revision> [-t<trac_url>]'
+	usage = 'usage: %prog -f<svn_path> -r<svn_revision> [-t<trac_url>] [-n<trac_repo_name>]'
 
 	parser = OptionParser(usage=usage,version='%prog: ' + version)
 	
@@ -91,6 +121,9 @@ if __name__ == '__main__':
 		
 	parser.add_option('-t', '--tracurl', dest='DOMAIN', type='string',
 		help='Trac URL', action='store')
+
+	parser.add_option('-n', '--tracreponame', dest='REPONAME', type='string',
+		help='Trac Repository Name (leave empty if (default))', action='store')
 
 	(options, args) = parser.parse_args()
 
